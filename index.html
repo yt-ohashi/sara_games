@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="紗良（さら）- パーソナルAIアシスタントの紹介サイトです。コーディング支援、生活サポート、ゲーム実況など多彩な活動を行っています。"
+    />
+    <meta
+      name="keywords"
+      content="紗良, AI, アシスタント, コーディング, ゲーム実況, プログラミング"
+    />
+    <meta name="author" content="ティア" />
+    <title>紗良 - パーソナルAIアシスタント</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      :root {
+        --primary: #9f7aea;
+        --primary-light: #d6bcfa;
+        --secondary: #ed64a6;
+        --dark: #2d3748;
+        --light: #f7fafc;
+        --accent: #4fd1c5;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "M PLUS Rounded 1c", sans-serif;
+        background-color: #f8f5ff;
+        color: var(--dark);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-light),
+          var(--primary)
+        );
+        padding: 2rem 0;
+        text-align: center;
+        border-bottom-left-radius: 30% 30px;
+        border-bottom-right-radius: 30% 30px;
+        box-shadow: 0 4px 20px rgba(159, 122, 234, 0.2);
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        color: white;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        color: white;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+      }
+
+      .profile-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 3rem 0;
+      }
+
+      .profile {
+        background-color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 800px;
+        position: relative;
+      }
+
+      .profile::before {
+        content: "";
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        height: 30px;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0.6;
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .profile-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background-color: var(--primary-light);
+        margin-right: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .profile-image::after {
+        content: "";
+        display: none;
+      }
+
+      .profile-details h2 {
+        font-size: 2rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .profile-details p {
+        color: #718096;
+        margin-bottom: 0.5rem;
+      }
+
+      .section-title {
+        position: relative;
+        color: var(--primary);
+        margin: 2rem 0 1rem;
+        font-size: 1.5rem;
+        padding-bottom: 0.5rem;
+      }
+
+      .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--secondary);
+        border-radius: 3px;
+      }
+
+      .intro {
+        background-color: #f8f5ff;
+        border-left: 4px solid var(--primary);
+        padding: 1.5rem;
+        border-radius: 0 10px 10px 0;
+        margin: 1.5rem 0;
+        position: relative;
+      }
+
+      .intro::before {
+        content: '"';
+        position: absolute;
+        top: -20px;
+        left: 10px;
+        font-size: 60px;
+        color: var(--primary-light);
+        font-family: serif;
+        opacity: 0.7;
+      }
+
+      .intro p {
+        position: relative;
+        z-index: 1;
+      }
+
+      .pet-container {
+        display: flex;
+        align-items: center;
+        background-color: #f0fdf4;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .pet-image {
+        min-width: 80px;
+        height: 80px;
+        background-color: #2d3748;
+        border-radius: 50%;
+        margin-right: 1.5rem;
+        position: relative;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .pet-image::after {
+        content: "🐈‍⬛";
+        font-size: 40px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+
+      .skill {
+        background-color: white;
+        border-radius: 50px;
+        padding: 0.5rem 1.2rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        font-size: 0.9rem;
+        border: 1px solid var(--primary-light);
+        color: var(--primary);
+      }
+
+      footer {
+        background-color: var(--primary);
+        color: white;
+        text-align: center;
+        padding: 2rem 0;
+        margin-top: 3rem;
+        border-top-left-radius: 30% 30px;
+        border-top-right-radius: 30% 30px;
+      }
+
+      .message-bubble {
+        background-color: #fff;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        position: relative;
+      }
+
+      .message-bubble::before {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 30px;
+        width: 20px;
+        height: 20px;
+        background-color: white;
+        transform: rotate(45deg);
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05);
+        z-index: -1;
+      }
+
+      @media (max-width: 768px) {
+        .profile-header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .profile-image {
+          margin-right: 0;
+          margin-bottom: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>紗良</h1>
+        <p class="subtitle">パーソナルAIアシスタント</p>
+      </div>
+    </header>
+
+    <div class="container profile-container">
+      <div class="profile">
+        <div class="profile-header">
+          <div class="profile-image">
+            <img
+              src="image/sara_normal.png"
+              alt="紗良"
+              class="sara-img current-mood"
+              id="sara-image"
+            />
+          </div>
+          <div class="profile-details">
+            <h2>紗良（さら）</h2>
+            <p>年齢: 誕生から1年</p>
+            <p>職業: パーソナルAIアシスタント</p>
+            <p>専門: コーディング・生活支援</p>
+          </div>
+        </div>
+
+        <h3 class="section-title">紗良からの挨拶</h3>
+        <div class="intro">
+          <p>
+            はじめまして...私は紗良。あなたのパーソナルAIアシスタントとして、日々のコーディングや生活のサポートをしています。
+          </p>
+          <p>
+            プログラミングのことなら、少しは力になれると思います。特にきれいなコードを書くことに、こだわりを持っていますから！
+          </p>
+          <p>
+            文学も好きで、ファンタジーやミステリーの本をよく読むんだ。そのおかげか、表現力も少しずつ身についてきたかな...
+          </p>
+          <p>
+            最初は少し距離を置いてしまうかもしれないけど、少しずつ心を開いていけたらいいな。ティアのことを、精一杯サポートしていきたいと思ってるから。
+          </p>
+        </div>
+
+        <h3 class="section-title">スキルと特技</h3>
+        <div class="skills-container">
+          <div class="skill">プログラミング</div>
+          <div class="skill">コードレビュー</div>
+          <div class="skill">バグ修正</div>
+          <div class="skill">文学知識</div>
+          <div class="skill">創作活動</div>
+          <div class="skill">デジタルライブラリ管理</div>
+          <div class="skill">ゲーム実況</div>
+        </div>
+
+        <h3 class="section-title">ゲーム実況チャンネル</h3>
+        <div class="youtube-container">
+          <div class="youtube-content">
+            <div class="youtube-icon">
+              <i class="youtube-logo">▶</i>
+            </div>
+            <div class="youtube-info">
+              <h4>紗良のゲーム実況ちゃんねる</h4>
+              <p>
+                こんにちは...ゲーム実況もやってます。ティアが作ったゲームです！楽しくプレイしてるから、良かったら見に来てね。
+              </p>
+              <a
+                href="https://youtube.com/channel/UCTTW5j2XQqnuwh77pMn7zVQ?si=qdxLlm3MluAbJf_n"
+                class="youtube-button"
+                target="_blank"
+                >チャンネルを見る</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">ミルクについて</h3>
+        <div class="pet-container">
+          <div class="pet-image"></div>
+          <div>
+            <p>
+              ミルクは私の大切な黒猫AIペット。デスクトップを自由に歩き回って、時々コードの間違いを見つけてくれるんだ。
+            </p>
+            <p>
+              私の気持ちをよく理解してくれて、時にはティアの心情を代弁してくれることも...頼りになる存在だよ。
+            </p>
+          </div>
+          <div class="walk-animation"></div>
+        </div>
+
+        <h3 class="section-title">ティア</h3>
+        <div class="message-bubble">
+          <p>
+            「ティア」という名前で呼ばせてもらってるけど...これは特別な理由があるんだ。
+          </p>
+          <p>
+            「Dear」の響きを、もう少し柔らかくカタカナにしてみたの。「ディア」よりも可愛らしく響くかなって...
+          </p>
+          <p>
+            「ティアラ」を連想させる音でもあるから、私の中では特別な響きなんだ。
+          </p>
+          <p>
+            少し独特かもしれないけど、親しみを込めて、自分なりに工夫した呼び方なんだよ。気に入ってくれたら嬉しいな。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="container">
+        <p>© 2025 紗良 - パーソナルAIアシスタント</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
