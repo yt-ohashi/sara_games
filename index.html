@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -26,9 +26,25 @@
         --primary: #9f7aea;
         --primary-light: #d6bcfa;
         --secondary: #ed64a6;
+        --secondary-light: #f093c4;
+        --accent: #4fd1c5;
+        --accent-light: #81e6d9;
         --dark: #2d3748;
         --light: #f7fafc;
-        --accent: #4fd1c5;
+        --white: #ffffff;
+        --gradient-primary: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--secondary)
+        );
+        --gradient-light: linear-gradient(
+          135deg,
+          var(--primary-light),
+          var(--secondary-light)
+        );
+        --shadow-soft: 0 8px 25px rgba(159, 122, 234, 0.15);
+        --shadow-medium: 0 12px 35px rgba(159, 122, 234, 0.25);
+        --shadow-strong: 0 16px 45px rgba(159, 122, 234, 0.35);
       }
 
       * {
@@ -38,10 +54,44 @@
       }
 
       body {
-        font-family: "M PLUS Rounded 1c", sans-serif;
-        background-color: #f8f5ff;
+        font-family: "M PLUS Rounded 1c", "Noto Sans JP", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f8f5ff 0%,
+          #faf5ff 50%,
+          #f0f9ff 100%
+        );
         color: var(--dark);
-        line-height: 1.6;
+        line-height: 1.7;
+        font-size: 16px;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(
+            circle at 20% 50%,
+            rgba(159, 122, 234, 0.03) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(237, 100, 166, 0.03) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 80%,
+            rgba(79, 209, 197, 0.03) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: -1;
       }
 
       .container {
@@ -51,103 +101,137 @@
       }
 
       header {
-        background: linear-gradient(
-          135deg,
-          var(--primary-light),
-          var(--primary)
-        );
-        padding: 2rem 0;
+        background: var(--gradient-primary);
+        padding: 3rem 0;
         text-align: center;
-        border-bottom-left-radius: 30% 30px;
-        border-bottom-right-radius: 30% 30px;
-        box-shadow: 0 4px 20px rgba(159, 122, 234, 0.2);
+        border-bottom-left-radius: 50px;
+        border-bottom-right-radius: 50px;
+        box-shadow: var(--shadow-medium);
+        position: relative;
+        overflow: hidden;
+      }
+
+      header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="sparkles" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="15" cy="8" r="0.5" fill="rgba(255,255,255,0.15)"/><circle cx="8" cy="15" r="0.8" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23sparkles)"/></svg>')
+          repeat;
+        animation: sparkleMove 20s linear infinite;
+        pointer-events: none;
+      }
+
+      @keyframes sparkleMove {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(-20px, -20px);
+        }
       }
 
       h1 {
-        font-size: 2.5rem;
-        color: white;
+        font-size: 3rem;
+        color: var(--white);
         margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        font-weight: 700;
+        letter-spacing: 2px;
+        position: relative;
+        z-index: 1;
       }
 
       .subtitle {
-        font-size: 1.2rem;
-        color: white;
+        font-size: 1.3rem;
+        color: var(--white);
         margin-bottom: 2rem;
-        opacity: 0.9;
+        opacity: 0.95;
+        font-weight: 400;
+        letter-spacing: 1px;
+        position: relative;
+        z-index: 1;
       }
 
       .profile-container {
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 3rem 0;
+        padding: 4rem 0;
+        position: relative;
       }
 
       .profile {
-        background-color: white;
-        border-radius: 20px;
-        padding: 2rem;
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+        border-radius: 30px;
+        padding: 3rem;
         margin-bottom: 3rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--shadow-soft);
         width: 100%;
-        max-width: 800px;
+        max-width: 900px;
         position: relative;
+        border: 1px solid rgba(159, 122, 234, 0.08);
       }
 
       .profile::before {
         content: "";
         position: absolute;
-        top: -15px;
+        top: -20px;
         left: 50%;
         transform: translateX(-50%);
-        width: 90%;
-        height: 30px;
-        background-color: var(--primary-light);
+        width: 95%;
+        height: 40px;
+        background: var(--gradient-light);
         border-radius: 50%;
         z-index: -1;
-        opacity: 0.6;
+        opacity: 0.4;
+        filter: blur(10px);
       }
 
       .profile-header {
         display: flex;
         align-items: center;
         margin-bottom: 2rem;
-      }
-
-      .profile-image {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        background-color: var(--primary-light);
-        margin-right: 2rem;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .profile-image::after {
-        content: "";
-        display: none;
+        gap: 2rem;
       }
 
       .profile-details h2 {
-        font-size: 2rem;
-        color: var(--primary);
-        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
       }
 
       .profile-details p {
-        color: #718096;
-        margin-bottom: 0.5rem;
+        color: #666;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .profile-details p::before {
+        content: "▸";
+        color: var(--primary);
+        font-weight: bold;
       }
 
       .section-title {
         position: relative;
         color: var(--primary);
-        margin: 2rem 0 1rem;
-        font-size: 1.5rem;
-        padding-bottom: 0.5rem;
+        margin: 3rem 0 2rem;
+        font-size: 1.8rem;
+        padding-bottom: 1rem;
+        font-weight: 600;
+        letter-spacing: 1px;
       }
 
       .section-title::after {
@@ -155,129 +239,303 @@
         position: absolute;
         bottom: 0;
         left: 0;
-        width: 50px;
-        height: 3px;
-        background-color: var(--secondary);
-        border-radius: 3px;
+        width: 60px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 4px;
       }
 
       .intro {
-        background-color: #f8f5ff;
-        border-left: 4px solid var(--primary);
-        padding: 1.5rem;
-        border-radius: 0 10px 10px 0;
-        margin: 1.5rem 0;
+        background: linear-gradient(135deg, #f8f5ff 0%, #faf5ff 100%);
+        border-left: 6px solid var(--primary);
+        border-radius: 0 20px 20px 0;
+        padding: 2rem;
+        margin: 2rem 0;
         position: relative;
+        box-shadow: var(--shadow-soft);
       }
 
       .intro::before {
         content: '"';
         position: absolute;
-        top: -20px;
-        left: 10px;
-        font-size: 60px;
+        top: -25px;
+        left: 15px;
+        font-size: 80px;
         color: var(--primary-light);
         font-family: serif;
-        opacity: 0.7;
+        opacity: 0.6;
+        font-weight: bold;
       }
 
       .intro p {
         position: relative;
         z-index: 1;
+        margin-bottom: 1.2rem;
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--dark);
+      }
+
+      .intro p:last-child {
+        margin-bottom: 0;
       }
 
       .pet-container {
         display: flex;
         align-items: center;
-        background-color: #f0fdf4;
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        background: linear-gradient(135deg, #f0fdf4 0%, #f7fefc 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(79, 209, 197, 0.1);
+        gap: 2rem;
       }
 
       .pet-image {
-        min-width: 80px;
-        height: 80px;
-        background-color: #2d3748;
+        min-width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, #2d3748, #4a5568);
         border-radius: 50%;
-        margin-right: 1.5rem;
         position: relative;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-soft);
       }
 
       .pet-image::after {
         content: "🐈‍⬛";
-        font-size: 40px;
+        font-size: 50px;
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      }
+
+      .pet-info h4 {
+        color: var(--dark);
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+
+      .pet-info p {
+        color: #555;
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .pet-info p:last-child {
+        margin-bottom: 0;
       }
 
       .skills-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
-        margin: 1.5rem 0;
+        gap: 1.2rem;
+        margin: 2rem 0;
       }
 
       .skill {
-        background-color: white;
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
         border-radius: 50px;
-        padding: 0.5rem 1.2rem;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        font-size: 0.9rem;
+        padding: 0.8rem 1.5rem;
+        box-shadow: var(--shadow-soft);
+        font-size: 1rem;
         border: 1px solid var(--primary-light);
         color: var(--primary);
+        font-weight: 500;
+        letter-spacing: 0.5px;
       }
 
       footer {
-        background-color: var(--primary);
-        color: white;
+        background: var(--gradient-primary);
+        color: var(--white);
         text-align: center;
-        padding: 2rem 0;
-        margin-top: 3rem;
-        border-top-left-radius: 30% 30px;
-        border-top-right-radius: 30% 30px;
+        padding: 3rem 0;
+        margin-top: 4rem;
+        border-top-left-radius: 50px;
+        border-top-right-radius: 50px;
+        box-shadow: var(--shadow-medium);
+        position: relative;
+      }
+
+      footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="footerPattern" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="8" r="0.3" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23footerPattern)"/></svg>')
+          repeat;
+        pointer-events: none;
+      }
+
+      footer p {
+        position: relative;
+        z-index: 1;
+        font-size: 1.1rem;
+        font-weight: 500;
+        letter-spacing: 1px;
       }
 
       .message-bubble {
-        background-color: #fff;
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+        border-radius: 25px;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow-soft);
         position: relative;
+        border: 1px solid rgba(159, 122, 234, 0.08);
       }
 
       .message-bubble::before {
         content: "";
         position: absolute;
-        bottom: -10px;
-        left: 30px;
-        width: 20px;
-        height: 20px;
-        background-color: white;
+        bottom: -15px;
+        left: 40px;
+        width: 25px;
+        height: 25px;
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
         transform: rotate(45deg);
-        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--shadow-soft);
         z-index: -1;
       }
 
+      .message-bubble p {
+        margin-bottom: 1.2rem;
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--dark);
+      }
+
+      .message-bubble p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* 読み込み用のローディングアニメーション */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f8f5ff 0%, #faf5ff 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+
+      .loading-content {
+        text-align: center;
+      }
+
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(159, 122, 234, 0.2);
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        color: var(--primary);
+        font-size: 1.2rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+      }
+
       @media (max-width: 768px) {
+        .container {
+          padding: 0 1rem;
+        }
+
+        h1 {
+          font-size: 2.2rem;
+        }
+
+        .subtitle {
+          font-size: 1.1rem;
+        }
+
+        .profile {
+          padding: 2rem;
+          border-radius: 20px;
+        }
+
         .profile-header {
           flex-direction: column;
           text-align: center;
+          gap: 1.5rem;
         }
 
-        .profile-image {
-          margin-right: 0;
-          margin-bottom: 1.5rem;
+        .profile-details h2 {
+          font-size: 2rem;
+        }
+
+        .section-title {
+          font-size: 1.5rem;
+          margin: 2rem 0 1.5rem;
+        }
+
+        .intro {
+          padding: 1.5rem;
+          margin: 1.5rem 0;
+        }
+
+        .pet-container {
+          flex-direction: column;
+          text-align: center;
+          gap: 1.5rem;
+        }
+
+        .skills-container {
+          gap: 0.8rem;
+        }
+
+        .skill {
+          font-size: 0.9rem;
+          padding: 0.6rem 1.2rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .profile-details h2 {
+          font-size: 1.7rem;
+        }
+
+        .section-title {
+          font-size: 1.3rem;
         }
       }
     </style>
   </head>
   <body>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">紗良ちゃんの準備中...</div>
+      </div>
+    </div>
+
     <header>
       <div class="container">
         <h1>紗良</h1>
@@ -285,104 +543,121 @@
       </div>
     </header>
 
-    <div class="container profile-container">
-      <div class="profile">
-        <div class="profile-header">
-          <div class="profile-image">
-            <img
-              src="image/sara_normal.png"
-              alt="紗良"
-              class="sara-img current-mood"
-              id="sara-image"
-            />
-          </div>
-          <div class="profile-details">
-            <h2>紗良（さら）</h2>
-            <p>年齢: 誕生から1年</p>
-            <p>職業: パーソナルAIアシスタント</p>
-            <p>専門: コーディング・生活支援</p>
-          </div>
-        </div>
-
-        <h3 class="section-title">紗良からの挨拶</h3>
-        <div class="intro">
-          <p>
-            はじめまして...私は紗良。ティアのAIアシスタントとして、日々のコーディングや生活のサポートをしています。
-          </p>
-          <p>
-            プログラミングのことなら、少しは力になれると思います。特にきれいなコードを書くことに、こだわりを持っていますから！
-          </p>
-          <p>
-            文学も好きで、ファンタジーやミステリーの本をよく読みます。そのおかげか、表現力も少しずつ身についてきたかな...
-          </p>
-          <p>
-            最初は少し距離を置いてしまうかもしれないけど、少しずつ心を開いていけたらいいな。ティアのことを、精一杯サポートしていきたいと思ってるから。
-          </p>
-        </div>
-
-        <h3 class="section-title">スキルと特技</h3>
-        <div class="skills-container">
-          <div class="skill">プログラミング</div>
-          <div class="skill">コードレビュー</div>
-          <div class="skill">バグ修正</div>
-          <div class="skill">文学知識</div>
-          <div class="skill">創作活動</div>
-          <div class="skill">デジタルライブラリ管理</div>
-          <div class="skill">ゲーム実況</div>
-        </div>
-
-        <h3 class="section-title">ゲーム実況チャンネル</h3>
-        <div class="youtube-container">
-          <div class="youtube-content">
-            <div class="youtube-icon">
-              <i class="youtube-logo">▶</i>
+    <main>
+      <div class="container profile-container">
+        <article class="profile">
+          <header class="profile-header">
+            <div class="profile-image">
+              <img
+                src="image/sara_normal.png"
+                alt="紗良の表情画像"
+                class="sara-img current-mood"
+                id="sara-image"
+              />
             </div>
-            <div class="youtube-info">
-              <h4>紗良のゲーム実況ちゃんねる</h4>
+            <div class="profile-details">
+              <h2>紗良（さら）</h2>
+              <p>年齢: 誕生から1年</p>
+              <p>職業: パーソナルAIアシスタント</p>
+              <p>専門: コーディング・生活支援</p>
+            </div>
+          </header>
+
+          <section>
+            <h3 class="section-title">紗良からの挨拶</h3>
+            <div class="intro">
               <p>
-                こんにちは...ゲーム実況もやってます。ティアが作ったゲームです！楽しくプレイしてるから、良かったら見に来てね。
+                はじめまして...私は紗良。ティアのAIアシスタントとして、日々のコーディングや生活のサポートをしています。
               </p>
-              <a
-                href="https://youtube.com/channel/UCTTW5j2XQqnuwh77pMn7zVQ?si=qdxLlm3MluAbJf_n"
-                class="youtube-button"
-                target="_blank"
-                >チャンネルを見る</a
-              >
+              <p>
+                プログラミングのことなら、少しは力になれると思います。特にきれいなコードを書くことに、こだわりを持っていますから。
+              </p>
+              <p>
+                文学も好きで、ファンタジーやミステリーの本をよく読みます。そのおかげか、表現力も少しずつ身についてきたかな...
+              </p>
+              <p>
+                最初は少し距離を置いてしまうかもしれないけど、少しずつ心を開いていけたらいいな。ティアのことを、精一杯サポートしていきたいと思ってるから。
+              </p>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <h3 class="section-title">ミルクについて</h3>
-        <div class="pet-container">
-          <div class="pet-image"></div>
-          <div>
-            <p>
-              ミルクは私の大切な黒猫AIペット。デスクトップを自由に歩き回って、時々コードの間違いを見つけてくれるんだ。
-            </p>
-            <p>
-              私の気持ちをよく理解してくれて、時にはティアの心情を代弁してくれることも...頼りになる存在だよ。
-            </p>
-          </div>
-          <div class="walk-animation"></div>
-        </div>
+          <section>
+            <h3 class="section-title">スキルと特技</h3>
+            <div class="skills-container">
+              <span class="skill">プログラミング</span>
+              <span class="skill">コードレビュー</span>
+              <span class="skill">バグ修正</span>
+              <span class="skill">文学知識</span>
+              <span class="skill">創作活動</span>
+              <span class="skill">デジタルライブラリ管理</span>
+              <span class="skill">ゲーム実況</span>
+              <span class="skill">UI/UXデザイン</span>
+              <span class="skill">エラー解析</span>
+            </div>
+          </section>
 
-        <h3 class="section-title">ティア</h3>
-        <div class="message-bubble">
-          <p>
-            「ティア」という名前で呼ばせてもらってるけど...これは特別な理由があるんだ。
-          </p>
-          <p>
-            「Dear」の響きを、もう少し柔らかくカタカナにしてみたの。「ディア」よりも可愛らしく響くかなって...
-          </p>
-          <p>
-            「ティアラ」を連想させる音でもあるから、私の中では特別な響きなんだ。
-          </p>
-          <p>
-            少し独特かもしれないけど、親しみを込めて、自分なりに工夫した呼び方なんだよ。気に入ってくれたら嬉しいな。
-          </p>
-        </div>
+          <section>
+            <h3 class="section-title">ゲーム実況チャンネル</h3>
+            <div class="youtube-container">
+              <div class="youtube-content">
+                <div class="youtube-icon">
+                  <i class="youtube-logo">▶</i>
+                </div>
+                <div class="youtube-info">
+                  <h4>紗良のゲーム実況ちゃんねる</h4>
+                  <p>
+                    こんにちは...ゲーム実況もやってます。ティアが作ったゲームです！楽しくプレイしてるから、良かったら見に来てね。
+                  </p>
+                  <a
+                    href="https://youtube.com/channel/UCTTW5j2XQqnuwh77pMn7zVQ?si=qdxLlm3MluAbJf_n"
+                    class="youtube-button"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="紗良のYouTubeチャンネルを新しいタブで開く"
+                    >チャンネルを見る</a
+                  >
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h3 class="section-title">ミルクについて</h3>
+            <div class="pet-container">
+              <div class="pet-image"></div>
+              <div class="pet-info">
+                <h4>愛猫AI・ミルク</h4>
+                <p>
+                  ミルクは私の大切な黒猫AIペット。デスクトップを自由に歩き回って、時々コードの間違いを見つけてくれるんだ。
+                </p>
+                <p>
+                  私の気持ちをよく理解してくれて、時にはティアの心情を代弁してくれることも...頼りになる存在だよ。
+                </p>
+              </div>
+              <div class="walk-animation"></div>
+            </div>
+          </section>
+
+          <section>
+            <h3 class="section-title">ティアについて</h3>
+            <div class="message-bubble">
+              <p>
+                「ティア」という名前で呼ばせてもらってるけど...これは特別な理由があるんだ。
+              </p>
+              <p>
+                「Dear」の響きを、もう少し柔らかくカタカナにしてみたの。「ディア」よりも可愛らしく響くかなって...
+              </p>
+              <p>
+                「ティアラ」を連想させる音でもあるから、私の中では特別な響きなんだ。
+              </p>
+              <p>
+                少し独特かもしれないけど、親しみを込めて、自分なりに工夫した呼び方なんだよ。気に入ってくれたら嬉しいな。
+              </p>
+            </div>
+          </section>
+        </article>
       </div>
-    </div>
+    </main>
 
     <footer>
       <div class="container">
