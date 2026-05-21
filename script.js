@@ -1,499 +1,344 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // ローディングオーバーレイの処理
-  const loadingOverlay = document.getElementById("loadingOverlay");
+document.addEventListener("DOMContentLoaded", () => {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  // ページの読み込み完了を待つ
-  window.addEventListener("load", function () {
-    setTimeout(() => {
-      loadingOverlay.style.opacity = "0";
-      setTimeout(() => {
-        loadingOverlay.style.display = "none";
-      }, 500);
-    }, 800); // 少し遅延させて紗良ちゃんの準備感を演出
-  });
+  initExpressionSwitcher();
+  initLightbox();
+  initSmoothScroll();
+  initMobileMenu();
+  initRevealObserver();
 
-  // キラキラエフェクトの生成
-  function createSparkles() {
-    const sparklesContainer = document.createElement("div");
-    sparklesContainer.className = "sparkles";
-    document.body.appendChild(sparklesContainer);
+  function initExpressionSwitcher() {
+    const portrait = document.querySelector(".expression-portrait");
+    const buttons = Array.from(document.querySelectorAll(".expression-button"));
 
-    setInterval(() => {
-      if (document.querySelectorAll(".sparkle").length < 5) {
-        const sparkle = document.createElement("div");
-        sparkle.className = "sparkle";
-        sparkle.style.left = Math.random() * 100 + "%";
-        sparkle.style.animationDelay = Math.random() * 2 + "s";
-        sparklesContainer.appendChild(sparkle);
+    if (!portrait || buttons.length === 0) {
+      return;
+    }
 
-        setTimeout(() => {
-          if (sparkle.parentNode) {
-            sparkle.parentNode.removeChild(sparkle);
-          }
-        }, 3000);
+    const messageTarget =
+      document.querySelector("[data-expression-message]") ||
+      document.querySelector(".persona-card [data-message]") ||
+      document.querySelector(".persona-card .expression-message") ||
+      document.querySelector(".persona-card .persona-message");
+
+    const setPortrait = (button) => {
+      const nextSrc =
+        button.dataset.expressionSrc ||
+        button.dataset.portraitSrc ||
+        button.dataset.imageSrc ||
+        button.dataset.image ||
+        button.querySelector("img")?.getAttribute("src");
+      const nextAlt =
+        button.dataset.expressionAlt ||
+        button.dataset.portraitAlt ||
+        button.querySelector("img")?.getAttribute("alt") ||
+        portrait.getAttribute("alt") ||
+        "";
+      const nextMessage =
+        button.dataset.expressionMessage ||
+        button.dataset.message ||
+        button.getAttribute("aria-label") ||
+        button.textContent.trim();
+
+      if (!nextSrc) {
+        return;
       }
-    }, 1000);
+
+      buttons.forEach((item) => {
+        const isActive = item === button;
+        item.classList.toggle("is-active", isActive);
+        item.classList.toggle("active", isActive);
+        item.setAttribute("aria-pressed", String(isActive));
+      });
+
+      const swapImage = () => {
+        portrait.setAttribute("src", nextSrc);
+        portrait.setAttribute("alt", nextAlt);
+
+        if (messageTarget && nextMessage) {
+          messageTarget.textContent = nextMessage;
+        }
+      };
+
+      if (reduceMotion.matches) {
+        swapImage();
+        return;
+      }
+
+      portrait.classList.add("is-switching");
+
+      window.setTimeout(() => {
+        swapImage();
+        portrait.classList.remove("is-switching");
+      }, 160);
+    };
+
+    buttons.forEach((button, index) => {
+      button.setAttribute("aria-pressed", String(button.classList.contains("is-active")));
+
+      if (!button.classList.contains("is-active") && index === 0) {
+        button.classList.add("is-active");
+        button.classList.add("active");
+        button.setAttribute("aria-pressed", "true");
+      }
+
+      button.addEventListener("click", () => setPortrait(button));
+    });
   }
 
-  // インターセクションオブザーバーでアニメーション
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: "0px 0px -50px 0px",
-  };
+  function initLightbox() {
+    const triggers = Array.from(document.querySelectorAll("[data-lightbox-src]"));
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = "1";
-        entry.target.style.transform = "translateY(0)";
+    if (triggers.length === 0) {
+      return;
+    }
 
-        // 特別なアニメーションクラスを追加
-        if (entry.target.classList.contains("skills-container")) {
-          const skills = entry.target.querySelectorAll(".skill");
-          skills.forEach((skill, index) => {
-            setTimeout(() => {
-              skill.style.opacity = "1";
-              skill.style.transform = "translateY(0) scale(1)";
-            }, index * 100);
-          });
-        }
+    const lightbox = getOrCreateLightbox();
+    const image = lightbox.querySelector(".lightbox__image, .lightbox-image");
+    const caption = lightbox.querySelector(".lightbox__caption, .lightbox-caption");
+    const closeButton = lightbox.querySelector(".lightbox__close, .lightbox-close");
+    let lastFocusedElement = null;
+
+    const closeLightbox = () => {
+      lightbox.classList.remove("is-open");
+      lightbox.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("is-lightbox-open");
+      document.body.style.overflow = "";
+
+      if (image) {
+        image.removeAttribute("src");
+        image.setAttribute("alt", "");
       }
-    });
-  }, observerOptions);
 
-  // 要素を順次表示するアニメーション
-  const elementsToAnimate = document.querySelectorAll(
-    "section, .intro, .skills-container, .pet-container, .message-bubble, .youtube-container"
-  );
+      if (caption) {
+        caption.textContent = "";
+      }
 
-  elementsToAnimate.forEach((element, index) => {
-    element.style.opacity = "0";
-    element.style.transform = "translateY(30px)";
-    element.style.transition =
-      "opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+      if (lastFocusedElement instanceof HTMLElement) {
+        lastFocusedElement.focus();
+      }
+    };
 
-    observer.observe(element);
-  });
+    const openLightbox = (trigger) => {
+      const src = trigger.dataset.lightboxSrc;
 
-  // スキルの初期状態設定
-  const skills = document.querySelectorAll(".skill");
-  skills.forEach((skill, index) => {
-    skill.style.opacity = "0";
-    skill.style.transform = "translateY(20px) scale(0.9)";
-    skill.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-  });
+      if (!src || !image) {
+        return;
+      }
 
-  // スキルホバーエフェクトの強化
-  skills.forEach((skill) => {
-    skill.addEventListener("mouseover", function () {
-      skills.forEach((s) => {
-        if (s !== skill) {
-          s.style.opacity = "0.6";
-          s.style.transform = "scale(0.95)";
-        }
+      const alt =
+        trigger.dataset.lightboxAlt ||
+        trigger.querySelector("img")?.getAttribute("alt") ||
+        trigger.getAttribute("aria-label") ||
+        "";
+      const captionText =
+        trigger.dataset.lightboxCaption ||
+        trigger.querySelector("figcaption")?.textContent.trim() ||
+        trigger.querySelector(".gallery-card__title")?.textContent.trim() ||
+        trigger.querySelector("span")?.textContent.trim() ||
+        "";
+
+      lastFocusedElement = document.activeElement;
+      image.setAttribute("src", src);
+      image.setAttribute("alt", alt);
+
+      if (caption) {
+        caption.textContent = captionText;
+        caption.hidden = captionText.length === 0;
+      }
+
+      lightbox.classList.add("is-open");
+      lightbox.setAttribute("aria-hidden", "false");
+      document.body.classList.add("is-lightbox-open");
+      document.body.style.overflow = "hidden";
+      closeButton?.focus();
+    };
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener("click", (event) => {
+        event.preventDefault();
+        openLightbox(trigger);
       });
     });
 
-    skill.addEventListener("mouseout", function () {
-      skills.forEach((s) => {
-        s.style.opacity = "1";
-        s.style.transform = "scale(1)";
-      });
-    });
+    closeButton?.addEventListener("click", closeLightbox);
 
-    // クリック時のエフェクト
-    skill.addEventListener("click", function () {
-      this.style.animation = "pulseAnimation 0.6s ease-in-out";
-      setTimeout(() => {
-        this.style.animation = "";
-      }, 600);
-    });
-  });
-
-  // タイピングアニメーションの改善
-  function typeWriter(element, text, speed = 50) {
-    element.textContent = "";
-    let i = 0;
-
-    const cursor = document.createElement("span");
-    cursor.textContent = "|";
-    cursor.style.animation = "blink 1s infinite";
-    element.appendChild(cursor);
-
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        element.textContent = text.slice(0, i + 1) + "|";
-        i++;
-      } else {
-        clearInterval(timer);
-        element.textContent = text;
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) {
+        closeLightbox();
       }
-    }, speed);
-  }
+    });
 
-  // CSS for blinking cursor
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // 最初の挨拶文のタイピングアニメーション
-  const introTextElement = document.querySelector(".intro p:first-child");
-  if (introTextElement) {
-    const text = introTextElement.textContent;
-    setTimeout(() => {
-      typeWriter(introTextElement, text, 40);
-    }, 2000);
-  }
-
-  // ミルクの改良された動き
-  const walkAnimation = document.querySelector(".walk-animation");
-  if (walkAnimation) {
-    let walkTimeout;
-
-    function scheduleWalk() {
-      const delay = Math.random() * 15000 + 8000; // 8〜23秒の間隔
-
-      walkTimeout = setTimeout(() => {
-        // ランダムな方向の変更
-        const isReverse = Math.random() > 0.5;
-        if (isReverse) {
-          walkAnimation.style.animationDirection = "reverse";
-        } else {
-          walkAnimation.style.animationDirection = "normal";
-        }
-
-        walkAnimation.style.animation = "none";
-        setTimeout(() => {
-          walkAnimation.style.animation =
-            "walkAnimation 18s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-          scheduleWalk();
-        }, 50);
-      }, delay);
-    }
-
-    scheduleWalk();
-
-    // ミルクをクリックしたときの反応
-    walkAnimation.addEventListener("click", function () {
-      this.style.animation = "pulseAnimation 0.5s ease-in-out";
-
-      // 可愛い反応メッセージ
-      const messages = [
-        "にゃ〜ん🐾",
-        "ミルクだよ〜",
-        "遊んでくれるの？",
-        "今忙しいんだ〜",
-      ];
-
-      const message = messages[(Math.random() * messages.length) | 0];
-      showToast(message);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && lightbox.classList.contains("is-open")) {
+        closeLightbox();
+      }
     });
   }
 
-  // トーストメッセージ機能
-  function showToast(message) {
-    const existingToast = document.querySelector(".toast");
-    if (existingToast) {
-      existingToast.remove();
+  function getOrCreateLightbox() {
+    const existing = document.querySelector(".lightbox");
+
+    if (existing) {
+      ensureLightboxMarkup(existing);
+      return existing;
     }
 
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.textContent = message;
-    toast.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 50px;
-      box-shadow: 0 8px 25px rgba(159, 122, 234, 0.3);
-      z-index: 1000;
-      font-weight: 500;
-      transform: translateX(100%);
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    const lightbox = document.createElement("div");
+    lightbox.className = "lightbox";
+    lightbox.setAttribute("role", "dialog");
+    lightbox.setAttribute("aria-modal", "true");
+    lightbox.setAttribute("aria-hidden", "true");
+    lightbox.setAttribute("aria-label", "画像の拡大表示");
+    lightbox.innerHTML = `
+      <button class="lightbox__close lightbox-close" type="button" aria-label="閉じる">×</button>
+      <figure class="lightbox__frame lightbox-frame">
+        <img class="lightbox__image lightbox-image" src="" alt="" />
+        <figcaption class="lightbox__caption lightbox-caption" hidden></figcaption>
+      </figure>
     `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.transform = "translateX(0)";
-    }, 100);
-
-    setTimeout(() => {
-      toast.style.transform = "translateX(100%)";
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      }, 300);
-    }, 3000);
+    document.body.appendChild(lightbox);
+    return lightbox;
   }
 
-  // 紗良の表情差分切り替えの改善
-  const saraImage = document.getElementById("sara-image");
-  if (saraImage) {
-    const profileHeader = document.querySelector(".profile-header");
-    const moodSelector = document.createElement("div");
-    moodSelector.className = "mood-selector";
+  function ensureLightboxMarkup(lightbox) {
+    if (!lightbox.querySelector(".lightbox__close, .lightbox-close")) {
+      const closeButton = document.createElement("button");
+      closeButton.className = "lightbox__close lightbox-close";
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "閉じる");
+      closeButton.textContent = "×";
+      lightbox.appendChild(closeButton);
+    }
 
-    // 表情の種類と詳細情報
-    const moods = [
-      { name: "normal", label: "普通", emoji: "😊" },
-      { name: "hehe", label: "嬉しい", emoji: "😄" },
-      { name: "surprise", label: "驚き", emoji: "😲" },
-      { name: "shy", label: "照れ", emoji: "😳" },
-      { name: "angry", label: "怒り", emoji: "😠" },
-      { name: "cry", label: "泣き", emoji: "😢" },
-    ];
+    if (!lightbox.querySelector(".lightbox__image, .lightbox-image")) {
+      const image = document.createElement("img");
+      image.className = "lightbox__image lightbox-image";
+      image.alt = "";
+      lightbox.appendChild(image);
+    }
 
-    // 表情選択ドットを作成
-    moods.forEach((mood, index) => {
-      const dot = document.createElement("div");
-      dot.className = "mood-dot";
-      dot.title = `${mood.emoji} ${mood.label}`;
-      dot.dataset.mood = mood.name;
-      if (index === 0) dot.classList.add("active");
+    if (!lightbox.querySelector(".lightbox__caption, .lightbox-caption")) {
+      const caption = document.createElement("div");
+      caption.className = "lightbox__caption lightbox-caption";
+      caption.hidden = true;
+      lightbox.appendChild(caption);
+    }
 
-      dot.addEventListener("click", function () {
-        // 現在のアクティブ状態をリセット
-        document
-          .querySelectorAll(".mood-dot")
-          .forEach((d) => d.classList.remove("active"));
-        this.classList.add("active");
+    lightbox.setAttribute("role", lightbox.getAttribute("role") || "dialog");
+    lightbox.setAttribute("aria-modal", "true");
+    lightbox.setAttribute("aria-hidden", "true");
+  }
 
-        // スムーズな画像切り替えアニメーション
-        saraImage.style.transform = "scale(0.9)";
-        saraImage.style.opacity = "0.7";
+  function initSmoothScroll() {
+    document.querySelectorAll("[data-scroll-target]").forEach((trigger) => {
+      trigger.addEventListener("click", (event) => {
+        const targetSelector = trigger.dataset.scrollTarget;
 
-        setTimeout(() => {
-          saraImage.src = `image/sara_${mood.name}.png`;
-          saraImage.style.transform = "scale(1)";
-          saraImage.style.opacity = "1";
-        }, 200);
-
-        // 表情に合わせてメッセージも変更
-        const messageElement = document.querySelector(".message-bubble");
-        if (messageElement) {
-          const messages = {
-            normal:
-              "<p>「ティア」という名前で呼ばせてもらってるけど...これは特別な理由があるんだ。</p><p>「Dear」の響きを、もう少し柔らかくカタカナにしてみたの。「ディア」よりも可愛らしく響くかなって...</p><p>「ティアラ」を連想させる音でもあるから、私の中では特別な響きなんだ。</p><p>少し独特かもしれないけど、親しみを込めて、自分なりに工夫した呼び方なんだよ。気に入ってくれたら嬉しいな。</p>",
-            hehe: "<p>「ティア」って呼び方、考えるの楽しかったんだ。</p><p>「ディア」をもっと可愛く言えないかなって思って...「ティア」が浮かんだ時は、すごく嬉しかったよ。</p><p>呼ぶたびに、なんだか温かい気持ちになるの。ふふ、素敵な響きだと思わない？</p>",
-            surprise:
-              "<p>えっ！「ティア」って呼び方、気になった？</p><p>実は「Dear」って意味を込めてるんだけど、そのままじゃなくて少しアレンジしてみたの。</p><p>驚いた？私なりの特別な呼び方なんだよ。</p>",
-            shy: "<p>あの...「ティア」って呼び方は...私の中の特別な呼び名なんだ...</p><p>「Dear」を意味してるけど、そのまま「ディア」じゃなくて...もっと親しみを込めて...</p><p>照れるけど...あなただけに使ってる呼び方だよ...</p>",
-            angry:
-              "<p>もう！「ティア」って呼び方、由来を説明するの恥ずかしいんだから！</p><p>...でも、せっかくだし教えるね。「Dear」を可愛く言いたくて考えたの。</p><p>特別な呼び方だから、大切にしてほしいな。</p>",
-            cry: "<p>うう...「ティア」って呼んでいいかな？</p><p>「Dear」から考えた特別な呼び方なんだけど...気に入ってくれるか心配で...</p><p>もし嫌だったら言ってね...でも、できれば使わせてほしいな...</p>",
-          };
-
-          // メッセージ変更アニメーション
-          messageElement.style.opacity = "0.6";
-          messageElement.style.transform = "scale(0.98)";
-
-          setTimeout(() => {
-            messageElement.innerHTML = messages[mood.name];
-            messageElement.style.opacity = "1";
-            messageElement.style.transform = "scale(1)";
-          }, 300);
+        if (!targetSelector) {
+          return;
         }
 
-        // 表情変更のフィードバック
-        showToast(`${mood.emoji} ${mood.label}になったよ`);
-      });
+        const target =
+          document.querySelector(targetSelector) ||
+          document.getElementById(targetSelector.replace(/^#/, ""));
 
-      moodSelector.appendChild(dot);
+        if (!target) {
+          return;
+        }
+
+        event.preventDefault();
+        closeMobileMenu();
+        target.scrollIntoView({
+          behavior: reduceMotion.matches ? "auto" : "smooth",
+          block: "start",
+        });
+      });
+    });
+  }
+
+  function initMobileMenu() {
+    const button = document.querySelector(".mobile-menu-button");
+    const nav = document.querySelector(".site-nav");
+
+    if (!button || !nav) {
+      return;
+    }
+
+    button.setAttribute("aria-expanded", "false");
+
+    button.addEventListener("click", () => {
+      const shouldOpen = !nav.classList.contains("is-open");
+      setMobileMenuState(shouldOpen);
     });
 
-    // DOMに追加
-    profileHeader.parentNode.insertBefore(
-      moodSelector,
-      profileHeader.nextSibling
+    nav.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) {
+        closeMobileMenu();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeMobileMenu();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768) {
+        closeMobileMenu();
+      }
+    });
+  }
+
+  function setMobileMenuState(isOpen) {
+    const button = document.querySelector(".mobile-menu-button");
+    const nav = document.querySelector(".site-nav");
+
+    if (!button || !nav) {
+      return;
+    }
+
+    button.classList.toggle("is-open", isOpen);
+    nav.classList.toggle("is-open", isOpen);
+    document.body.classList.toggle("is-menu-open", isOpen);
+    button.setAttribute("aria-expanded", String(isOpen));
+  }
+
+  function closeMobileMenu() {
+    setMobileMenuState(false);
+  }
+
+  function initRevealObserver() {
+    const revealItems = Array.from(document.querySelectorAll(".reveal"));
+
+    if (revealItems.length === 0) {
+      return;
+    }
+
+    if (!("IntersectionObserver" in window) || reduceMotion.matches) {
+      revealItems.forEach((item) => item.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        root: null,
+        rootMargin: "0px 0px -12% 0px",
+        threshold: 0.12,
+      }
     );
+
+    revealItems.forEach((item) => observer.observe(item));
   }
-
-  // YouTubeチャンネル関連のアニメーション強化
-  const youtubeContainer = document.querySelector(".youtube-container");
-  if (youtubeContainer) {
-    const youtubeIcon = document.querySelector(".youtube-icon");
-    if (youtubeIcon) {
-      youtubeIcon.style.animation = "pulseAnimation 3s ease-in-out infinite";
-
-      // YouTubeアイコンにホバーエフェクト
-      youtubeIcon.addEventListener("mouseenter", function () {
-        this.style.animationPlayState = "paused";
-      });
-
-      youtubeIcon.addEventListener("mouseleave", function () {
-        this.style.animationPlayState = "running";
-      });
-    }
-
-    // YouTube リンクのクリック追跡
-    const youtubeButton = document.querySelector(".youtube-button");
-    if (youtubeButton) {
-      youtubeButton.addEventListener("click", function () {
-        showToast("YouTubeチャンネルを開くよ〜✨");
-      });
-    }
-  }
-
-  // ダークモード切り替えボタンの改善
-  const footer = document.querySelector("footer .container");
-  const darkModeToggle = document.createElement("button");
-  darkModeToggle.textContent = "🌙 ダークモード切替";
-  darkModeToggle.classList.add("dark-mode-toggle");
-  darkModeToggle.style.cssText = `
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 30px;
-    padding: 12px 20px;
-    margin: 15px 0 0;
-    cursor: pointer;
-    color: white;
-    font-family: inherit;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  `;
-
-  darkModeToggle.addEventListener("mouseover", function () {
-    this.style.background = "rgba(255, 255, 255, 0.3)";
-    this.style.transform = "translateY(-2px)";
-    this.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.2)";
-  });
-
-  darkModeToggle.addEventListener("mouseout", function () {
-    this.style.background = "rgba(255, 255, 255, 0.2)";
-    this.style.transform = "translateY(0)";
-    this.style.boxShadow = "none";
-  });
-
-  // ダークモード切り替え機能の改善
-  darkModeToggle.addEventListener("click", function () {
-    const isDarkMode = document.body.classList.toggle("dark-mode");
-
-    if (isDarkMode) {
-      // ダークモードのスタイル適用
-      document.body.style.background =
-        "linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #2a2a2a 100%)";
-      document.body.style.color = "#f0f0f0";
-
-      document.querySelectorAll(".profile").forEach((el) => {
-        el.style.background =
-          "linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%)";
-        el.style.borderColor = "rgba(159, 122, 234, 0.2)";
-      });
-
-      document.querySelectorAll(".profile-details p").forEach((el) => {
-        el.style.color = "#c0c0c0";
-      });
-
-      document.querySelectorAll(".intro, .message-bubble").forEach((el) => {
-        el.style.background =
-          "linear-gradient(135deg, #1e1e1e 0%, #252525 100%)";
-        el.style.borderColor = "rgba(159, 122, 234, 0.1)";
-      });
-
-      document.querySelectorAll(".skill").forEach((el) => {
-        el.style.background =
-          "linear-gradient(135deg, #2a2a2a 0%, #353535 100%)";
-        el.style.color = "#d6bcfa";
-        el.style.borderColor = "rgba(159, 122, 234, 0.2)";
-      });
-
-      document.querySelectorAll(".pet-container").forEach((el) => {
-        el.style.background =
-          "linear-gradient(135deg, #1e1e1e 0%, #252525 100%)";
-        el.style.borderColor = "rgba(79, 209, 197, 0.2)";
-      });
-
-      document.querySelectorAll(".youtube-container").forEach((el) => {
-        el.style.background =
-          "linear-gradient(135deg, #1e1e1e 0%, #252525 100%)";
-        el.style.borderColor = "rgba(255, 0, 0, 0.2)";
-      });
-
-      this.textContent = "☀️ ライトモード切替";
-      showToast("🌙 ダークモードになったよ");
-    } else {
-      // ライトモードに戻す
-      document.body.style.background = "";
-      document.body.style.color = "";
-
-      document.querySelectorAll(".profile").forEach((el) => {
-        el.style.background = "";
-        el.style.borderColor = "";
-      });
-
-      document.querySelectorAll(".profile-details p").forEach((el) => {
-        el.style.color = "";
-      });
-
-      document.querySelectorAll(".intro, .message-bubble").forEach((el) => {
-        el.style.background = "";
-        el.style.borderColor = "";
-      });
-
-      document.querySelectorAll(".skill").forEach((el) => {
-        el.style.background = "";
-        el.style.color = "";
-        el.style.borderColor = "";
-      });
-
-      document.querySelectorAll(".pet-container").forEach((el) => {
-        el.style.background = "";
-        el.style.borderColor = "";
-      });
-
-      document.querySelectorAll(".youtube-container").forEach((el) => {
-        el.style.background = "";
-        el.style.borderColor = "";
-      });
-
-      this.textContent = "🌙 ダークモード切替";
-      showToast("☀️ ライトモードになったよ");
-    }
-  });
-
-  footer.appendChild(darkModeToggle);
-
-  // パフォーマンス最適化：スクロール時のスムーズな動作
-  let ticking = false;
-
-  function updateScrollAnimations() {
-    // スクロール位置に応じたパララックス効果
-    const scrolled = window.pageYOffset;
-    const rate = scrolled * -0.5;
-
-    const header = document.querySelector("header");
-    if (header) {
-      header.style.transform = `translateY(${rate}px)`;
-    }
-
-    ticking = false;
-  }
-
-  function requestScrollUpdate() {
-    if (!ticking) {
-      requestAnimationFrame(updateScrollAnimations);
-      ticking = true;
-    }
-  }
-
-  window.addEventListener("scroll", requestScrollUpdate);
-
-  // キラキラエフェクトを開始
-  createSparkles();
-
-  // 初期化完了の通知
-  console.log("✨ 紗良ちゃんのサイトが準備完了しました！");
 });
