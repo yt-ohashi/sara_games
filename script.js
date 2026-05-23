@@ -97,13 +97,90 @@ document.addEventListener("DOMContentLoaded", () => {
     const image = lightbox.querySelector(".lightbox__image, .lightbox-image");
     const caption = lightbox.querySelector(".lightbox__caption, .lightbox-caption");
     const closeButton = lightbox.querySelector(".lightbox__close, .lightbox-close");
+    const previousButton = lightbox.querySelector(".lightbox__nav--previous");
+    const nextButton = lightbox.querySelector(".lightbox__nav--next");
+    const itemGroups = new Map();
+    const triggerIndexes = new Map();
     let lastFocusedElement = null;
+    let activeItems = [];
+    let currentIndex = -1;
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+
+    triggers.forEach((trigger) => {
+      const src = trigger.dataset.lightboxSrc;
+
+      if (!src) {
+        return;
+      }
+
+      const groupKey = trigger.closest(".gallery-grid") ? "gallery" : `single:${src}`;
+      const groupItems = itemGroups.get(groupKey) || [];
+      let index = groupItems.findIndex((item) => item.src === src);
+
+      if (index === -1) {
+        index = groupItems.length;
+        groupItems.push({
+          src,
+          alt:
+            trigger.dataset.lightboxAlt ||
+            trigger.querySelector("img")?.getAttribute("alt") ||
+            trigger.getAttribute("aria-label") ||
+            "",
+          caption: trigger.dataset.lightboxCaption || "",
+        });
+        itemGroups.set(groupKey, groupItems);
+      }
+
+      triggerIndexes.set(trigger, { groupKey, index });
+    });
+
+    const updateNavigationButtons = () => {
+      const shouldHide = activeItems.length < 2;
+
+      if (previousButton) {
+        previousButton.hidden = shouldHide;
+      }
+
+      if (nextButton) {
+        nextButton.hidden = shouldHide;
+      }
+    };
+
+    const renderLightboxItem = (index) => {
+      const item = activeItems[index];
+
+      if (!item || !image) {
+        return;
+      }
+
+      currentIndex = index;
+      image.setAttribute("src", item.src);
+      image.setAttribute("alt", item.alt);
+
+      if (caption) {
+        caption.textContent = item.caption;
+        caption.hidden = item.caption.length === 0;
+      }
+    };
+
+    const navigateLightbox = (direction) => {
+      if (!lightbox.classList.contains("is-open") || activeItems.length < 2) {
+        return;
+      }
+
+      const nextIndex = (currentIndex + direction + activeItems.length) % activeItems.length;
+      renderLightboxItem(nextIndex);
+    };
 
     const closeLightbox = () => {
       lightbox.classList.remove("is-open");
       lightbox.setAttribute("aria-hidden", "true");
       document.body.classList.remove("is-lightbox-open");
       document.body.style.overflow = "";
+      activeItems = [];
+      currentIndex = -1;
+      updateNavigationButtons();
 
       if (image) {
         image.removeAttribute("src");
@@ -120,32 +197,16 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const openLightbox = (trigger) => {
-      const src = trigger.dataset.lightboxSrc;
+      const context = triggerIndexes.get(trigger);
 
-      if (!src || !image) {
+      if (!context || !image) {
         return;
       }
 
-      const alt =
-        trigger.dataset.lightboxAlt ||
-        trigger.querySelector("img")?.getAttribute("alt") ||
-        trigger.getAttribute("aria-label") ||
-        "";
-      const captionText =
-        trigger.dataset.lightboxCaption ||
-        trigger.querySelector("figcaption")?.textContent.trim() ||
-        trigger.querySelector(".gallery-card__title")?.textContent.trim() ||
-        trigger.querySelector("span")?.textContent.trim() ||
-        "";
-
       lastFocusedElement = document.activeElement;
-      image.setAttribute("src", src);
-      image.setAttribute("alt", alt);
-
-      if (caption) {
-        caption.textContent = captionText;
-        caption.hidden = captionText.length === 0;
-      }
+      activeItems = itemGroups.get(context.groupKey) || [];
+      updateNavigationButtons();
+      renderLightboxItem(context.index);
 
       lightbox.classList.add("is-open");
       lightbox.setAttribute("aria-hidden", "false");
@@ -162,6 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     closeButton?.addEventListener("click", closeLightbox);
+    previousButton?.addEventListener("click", () => navigateLightbox(-1));
+    nextButton?.addEventListener("click", () => navigateLightbox(1));
 
     lightbox.addEventListener("click", (event) => {
       if (event.target === lightbox) {
@@ -169,9 +232,45 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    lightbox.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("button")) {
+        return;
+      }
+
+      swipeStartX = event.clientX;
+      swipeStartY = event.clientY;
+    });
+
+    lightbox.addEventListener("pointerup", (event) => {
+      if (!swipeStartX || event.target.closest("button")) {
+        return;
+      }
+
+      const distanceX = event.clientX - swipeStartX;
+      const distanceY = event.clientY - swipeStartY;
+      swipeStartX = 0;
+      swipeStartY = 0;
+
+      if (Math.abs(distanceX) < 48 || Math.abs(distanceX) < Math.abs(distanceY) * 1.4) {
+        return;
+      }
+
+      navigateLightbox(distanceX > 0 ? -1 : 1);
+    });
+
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && lightbox.classList.contains("is-open")) {
+      if (!lightbox.classList.contains("is-open")) {
+        return;
+      }
+
+      if (event.key === "Escape") {
         closeLightbox();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        navigateLightbox(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        navigateLightbox(1);
       }
     });
   }
@@ -192,10 +291,12 @@ document.addEventListener("DOMContentLoaded", () => {
     lightbox.setAttribute("aria-label", "画像の拡大表示");
     lightbox.innerHTML = `
       <button class="lightbox__close lightbox-close" type="button" aria-label="閉じる">×</button>
+      <button class="lightbox__nav lightbox__nav--previous" type="button" aria-label="前の画像">‹</button>
       <figure class="lightbox__frame lightbox-frame">
         <img class="lightbox__image lightbox-image" src="" alt="" />
         <figcaption class="lightbox__caption lightbox-caption" hidden></figcaption>
       </figure>
+      <button class="lightbox__nav lightbox__nav--next" type="button" aria-label="次の画像">›</button>
     `;
     document.body.appendChild(lightbox);
     return lightbox;
@@ -209,6 +310,24 @@ document.addEventListener("DOMContentLoaded", () => {
       closeButton.setAttribute("aria-label", "閉じる");
       closeButton.textContent = "×";
       lightbox.appendChild(closeButton);
+    }
+
+    if (!lightbox.querySelector(".lightbox__nav--previous")) {
+      const previousButton = document.createElement("button");
+      previousButton.className = "lightbox__nav lightbox__nav--previous";
+      previousButton.type = "button";
+      previousButton.setAttribute("aria-label", "前の画像");
+      previousButton.textContent = "‹";
+      lightbox.appendChild(previousButton);
+    }
+
+    if (!lightbox.querySelector(".lightbox__nav--next")) {
+      const nextButton = document.createElement("button");
+      nextButton.className = "lightbox__nav lightbox__nav--next";
+      nextButton.type = "button";
+      nextButton.setAttribute("aria-label", "次の画像");
+      nextButton.textContent = "›";
+      lightbox.appendChild(nextButton);
     }
 
     if (!lightbox.querySelector(".lightbox__image, .lightbox-image")) {

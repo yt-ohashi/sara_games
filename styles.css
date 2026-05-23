@@ -604,7 +604,7 @@ section:not(.hero) {
 .gallery-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: 1.1fr 1.1fr 1.4fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 2rem;
 }
 
@@ -681,7 +681,9 @@ section:not(.hero) {
   padding: 2rem;
   pointer-events: none;
   position: fixed;
+  touch-action: pan-y;
   transition: opacity 0.22s ease;
+  user-select: none;
   z-index: 200;
 }
 
@@ -709,6 +711,40 @@ section:not(.hero) {
   right: 1.5rem;
   top: 1.5rem;
   width: 44px;
+}
+
+.lightbox__nav {
+  align-items: center;
+  background: rgba(244, 239, 230, 0.9);
+  border: 0;
+  border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  font-size: 2.6rem;
+  height: 52px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0 0 0.18rem;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, transform 0.2s ease;
+  width: 52px;
+}
+
+.lightbox__nav:hover,
+.lightbox__nav:focus-visible {
+  background: var(--text);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.lightbox__nav--previous {
+  left: 1.5rem;
+}
+
+.lightbox__nav--next {
+  right: 1.5rem;
 }
 
 .reveal {
@@ -892,6 +928,19 @@ section:not(.hero) {
 
   .gallery-card {
     min-height: 260px;
+  }
+
+  .lightbox__nav {
+    bottom: 1.2rem;
+    height: 46px;
+    top: auto;
+    transform: none;
+    width: 46px;
+  }
+
+  .lightbox__nav:hover,
+  .lightbox__nav:focus-visible {
+    transform: scale(1.04);
   }
 
   .site-footer {
